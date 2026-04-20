@@ -5,338 +5,191 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>多少遊戲 (真實蘋果版)</title>
+    <title>多少遊戲 (特教優化版)</title>
     <style>
         /* --- 基礎設定 --- */
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Arial Rounded MT Bold', sans-serif;
-            background-color: #000;
-            color: white;
-            touch-action: none;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
+            background-color: #121212; /* 微調背景為極深灰，減少全黑對比度過高造成的視覺疲勞 */
+            color: white; touch-action: none; -webkit-user-select: none;
+            user-select: none; -webkit-touch-callout: none;
         }
 
         /* --- 啟動封面 --- */
         #start-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #111;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111; z-index: 2000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; cursor: pointer;
         }
         #start-btn {
-            padding: 20px 40px;
-            font-size: 30px;
-            background: #00FF00;
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            animation: pulseBtn 2s infinite;
+            padding: 20px 40px; font-size: 30px; background: #00E676; color: #000;
+            border: none; border-radius: 50px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,230,118,0.4); animation: pulseBtn 2s infinite;
         }
         @keyframes pulseBtn {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); }
         }
 
         /* --- 頂部問題區 --- */
         #header {
-            height: 25%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #222;
-            border-bottom: 5px solid #555;
-            box-sizing: border-box;
-            font-size: 5vh;
-            padding-top: env(safe-area-inset-top);
-            position: relative;
+            height: 25%; display: flex; align-items: center; justify-content: center;
+            background-color: #1E1E1E; border-bottom: 4px solid #333; box-sizing: border-box;
+            font-size: 5vh; padding-top: env(safe-area-inset-top); position: relative;
         }
-        #question-text { margin-right: 30px; }
-        
-        .sample-display {
-            width: 18vh; 
-            height: 18vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.3s;
-        }
+        #question-text { margin-right: 30px; font-weight: bold; color: #FFF; }
+        .sample-display { width: 18vh; height: 18vh; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s; }
 
         /* --- 遊戲主區域 --- */
-        #game-area {
-            height: 75%;
-            display: flex;
-            width: 100%;
-            position: relative;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+        #game-area { height: 75%; display: flex; width: 100%; position: relative; padding-bottom: env(safe-area-inset-bottom); }
         .option-container {
-            width: 50%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            box-sizing: border-box;
-            border: 10px solid #444;
-            cursor: pointer;
-            opacity: 0; 
-            transition: opacity 0.5s ease; /* 淡入淡出效果 */
+            width: 50%; height: 100%; display: flex; justify-content: center; align-items: center;
+            position: relative; box-sizing: border-box; border: 8px solid #2A2A2A;
+            cursor: pointer; opacity: 0; transition: opacity 0.5s ease, filter 0.3s ease;
         }
-        #left-option { border-right: 5px solid #444; background-color: #111; }
-        #right-option { border-left: 5px solid #444; background-color: #1a1a1a; }
+        #left-option { border-right: 4px solid #2A2A2A; background-color: #181818; }
+        #right-option { border-left: 4px solid #2A2A2A; background-color: #1C1C1C; }
 
-        .shape-svg {
-            width: 80%; 
-            height: 80%;
-            overflow: visible;
-            /* 讓圖片有點陰影，增加立體感 */
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
-        }
+        .shape-svg { width: 80%; height: 80%; overflow: visible; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.6)); }
 
         /* --- 中央提示 --- */
         #center-prompt {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50vh; 
-            height: 50vh;
-            display: none; 
-            z-index: 500;
-            animation: pulsePrompt 2s infinite;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 50vh; height: 50vh; display: none; z-index: 500; animation: pulsePrompt 2s infinite;
         }
-        #center-prompt svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,1));
-        }
-        @keyframes pulsePrompt {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
+        #center-prompt svg { width: 100%; height: 100%; filter: drop-shadow(0 0 25px rgba(255,255,255,0.8)); }
+        @keyframes pulsePrompt { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.08); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
         /* 進度條 */
         .progress-ring {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            height: 90%;
-            border: 10px solid transparent;
-            border-radius: 20px;
-            pointer-events: none;
-            box-sizing: border-box;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; height: 90%; border: 12px solid transparent; border-radius: 25px;
+            pointer-events: none; box-sizing: border-box;
         }
-        .active-ring {
-            border-color: #fff;
-            animation: fillBorder linear forwards; 
-        }
-        @keyframes fillBorder {
-            from { clip-path: inset(0 100% 0 0); border-color: yellow; }
-            to { clip-path: inset(0 0 0 0); border-color: #0f0; }
-        }
+        .active-ring { border-color: rgba(255,255,255,0.8); animation: fillBorder linear forwards; }
+        @keyframes fillBorder { from { clip-path: inset(0 100% 0 0); border-color: #FFEB3B; } to { clip-path: inset(0 0 0 0); border-color: #00E676; } }
 
         /* 勝利動畫 */
         .fullscreen-win {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 100;
-            background-color: rgba(0,0,0,1) !important;
-            border: none !important;
-            opacity: 1 !important;
-            transition: transform 0.5s ease !important;
+            position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important;
+            z-index: 100; background-color: #000 !important; border: none !important; opacity: 1 !important; transition: transform 0.5s ease !important;
         }
-        .fullscreen-win svg {
-            width: 80% !important;
-            height: 80% !important;
-            animation: slowBounce 3s infinite ease-in-out !important;
-        }
-        @keyframes slowBounce {
-            0% { transform: scale(0.9) translateY(0); }
-            50% { transform: scale(1.1) translateY(-20px); }
-            100% { transform: scale(0.9) translateY(0); }
-        }
+        .fullscreen-win svg { width: 80% !important; height: 80% !important; animation: slowBounce 2s infinite ease-in-out !important; }
+        @keyframes slowBounce { 0%, 100% { transform: scale(0.9) translateY(0); } 50% { transform: scale(1.05) translateY(-15px); } }
 
         /* --- UI 按鈕群 --- */
         #next-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 90px;
-            height: 90px;
-            background-color: #fff;
-            border-radius: 15px;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 200;
-            box-shadow: 0 4px 15px rgba(255,255,255,0.3);
+            position: absolute; top: 20px; right: 20px; width: 80px; height: 80px;
+            background-color: #FFF; border-radius: 20px; display: none; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 200; box-shadow: 0 6px 20px rgba(0,0,0,0.5);
         }
-        #next-btn svg { width: 50px; height: 50px; fill: #000; }
+        #next-btn svg { width: 40px; height: 40px; fill: #000; }
 
         /* 設定按鈕 */
         #settings-trigger {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 800;
+            position: absolute; bottom: 20px; left: 20px; width: 60px; height: 60px;
+            background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 800; backdrop-filter: blur(5px);
         }
-        #settings-trigger svg { width: 30px; height: 30px; fill: #fff; }
+        #settings-trigger svg { width: 28px; height: 28px; fill: #fff; }
 
         /* --- 設定頁面 (Modal) --- */
         #settings-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; color: #fff;
         }
         .settings-content {
-            width: 90%;
-            max-width: 700px;
-            background: #222;
-            padding: 20px;
-            border-radius: 20px;
-            border: 2px solid #555;
-            max-height: 90vh;
-            overflow-y: auto;
+            width: 90%; max-width: 600px; background: #222; padding: 25px; border-radius: 20px;
+            border: 1px solid #444; max-height: 90vh; overflow-y: auto;
         }
         .setting-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .setting-label { font-size: 20px; margin-bottom: 10px; display: block; color: #00FF00; }
+        .setting-label { font-size: 18px; margin-bottom: 10px; display: block; color: #00E676; font-weight: bold; }
+        input[type=range] { width: 100%; height: 10px; background: #555; outline: none; border-radius: 5px; appearance: none; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 25px; height: 25px; background: #00E676; border-radius: 50%; }
         
-        input[type=range] { width: 100%; height: 15px; background: #444; outline: none; border-radius: 10px; }
-        
-        .options-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .options-group { display: flex; flex-wrap: wrap; gap: 10px; }
         .option-btn {
-            flex: 1;
-            padding: 12px;
-            background: #333;
-            border: 2px solid #555;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 10px;
-            min-width: 80px;
-            text-align: center;
+            flex: 1; padding: 12px; background: #333; border: 2px solid #555; color: #fff; font-size: 16px;
+            cursor: pointer; border-radius: 12px; min-width: 90px; text-align: center; transition: 0.2s;
         }
-        .option-btn.selected { background: #00FF00; color: #000; border-color: #00FF00; font-weight: bold; }
+        .option-btn.selected { background: #00E676; color: #000; border-color: #00E676; font-weight: bold; }
 
         .color-check-group { display: flex; gap: 15px; flex-wrap: wrap; }
-        .color-checkbox {
-            display: flex; align-items: center; font-size: 18px; cursor: pointer;
-        }
-        .color-checkbox input { width: 20px; height: 20px; margin-right: 10px; }
-        .color-preview { width: 20px; height: 20px; border-radius: 50%; margin-left: 5px; border: 1px solid #fff; }
+        .color-checkbox { display: flex; align-items: center; font-size: 18px; cursor: pointer; padding: 5px 10px; background: #333; border-radius: 8px; }
+        .color-checkbox input { width: 22px; height: 22px; margin-right: 10px; accent-color: #00E676; }
 
-        #stats-display { font-size: 18px; color: #fff; background: #333; padding: 10px; border-radius: 10px; text-align: center; }
-        #reset-stats-btn { background: #555; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-left: 10px; font-size: 14px; }
+        #stats-display { font-size: 18px; color: #fff; background: #111; padding: 12px; border-radius: 12px; text-align: center; display: flex; justify-content: space-between; align-items: center;}
+        #reset-stats-btn { background: #D32F2F; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; }
 
-        #close-settings-btn {
-            margin-top: 10px; padding: 15px 40px; background: white; color: black; font-size: 22px;
-            border: none; border-radius: 10px; width: 100%; font-weight: bold;
-        }
-
-        #status-hint {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            font-size: 14px; color: #888; pointer-events: none;
-        }
+        #close-settings-btn { margin-top: 15px; padding: 15px; background: #FFF; color: #000; font-size: 20px; border: none; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
+        #status-hint { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #AAA; pointer-events: none; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px;}
     </style>
 </head>
 <body>
 
     <div id="start-overlay" onclick="startGameFlow()">
         <button id="start-btn">開始遊戲</button>
-        <p style="color:#888; margin-top:20px;">點擊開始 (平板/眼動皆可)</p>
+        <p style="color:#AAA; margin-top:25px; font-size: 18px;">點擊開始 (支援觸控 / 眼動儀)</p>
     </div>
 
     <div id="settings-modal">
         <div class="settings-content">
-            <h2 style="text-align:center; margin-top:0;">設定</h2>
+            <h2 style="text-align:center; margin-top:0; color:#FFF;">特教設定面板</h2>
             
             <div class="setting-row">
-                <span class="setting-label">學習數據:</span>
+                <span class="setting-label">📊 學習數據:</span>
                 <div id="stats-display">
-                    答對: <span id="stat-correct">0</span> / 總題數: <span id="stat-total">0</span> 
-                    (準確度: <span id="stat-accuracy">0%</span>)
+                    <span>答對: <b id="stat-correct" style="color:#00E676;">0</b> / 總數: <b id="stat-total">0</b> (<span id="stat-accuracy">0%</span>)</span>
                     <button id="reset-stats-btn" onclick="resetStats()">重置</button>
                 </div>
             </div>
 
             <div class="setting-row">
-                <span class="setting-label">遊戲模式 (目標):</span>
+                <span class="setting-label">🎯 學習目標 (找多或找少):</span>
                 <div class="options-group">
-                    <div class="option-btn selected" id="mode-more" onclick="setGameMode('MORE')">多 (More)</div>
-                    <div class="option-btn" id="mode-less" onclick="setGameMode('LESS')">少 (Less)</div>
+                    <div class="option-btn selected" id="mode-more" onclick="setGameMode('MORE')">多啲 (More)</div>
+                    <div class="option-btn" id="mode-less" onclick="setGameMode('LESS')">少啲 (Less)</div>
                 </div>
             </div>
 
             <div class="setting-row">
-                <span class="setting-label">難度:</span>
+                <span class="setting-label">🧠 認知難度與提示層級:</span>
                 <div class="options-group">
-                    <button class="option-btn diff-btn" id="diff-high" onclick="setDifficulty('high')">較高</button>
-                    <button class="option-btn diff-btn selected" id="diff-normal" onclick="setDifficulty('normal')">基礎</button>
-                    <button class="option-btn diff-btn" id="diff-low" onclick="setDifficulty('low')">較低</button>
-                    <button class="option-btn diff-btn" id="diff-errorless" onclick="setDifficulty('errorless')">無錯誤</button>
-                </div>
-                <p id="diff-desc" style="color:#aaa; font-size:14px; margin-top:10px;">
-                    基礎：顯示文字與圖示，3秒後出現選項。
-                </p>
-            </div>
-
-            <div class="setting-row">
-                <span class="setting-label">蘋果顏色 (註: 使用圖片時固定為紅色):</span>
-                <div class="color-check-group" id="color-settings">
+                    <button class="option-btn diff-btn" id="diff-high" onclick="setDifficulty('high')">聽覺記憶 (無圖)</button>
+                    <button class="option-btn diff-btn selected" id="diff-normal" onclick="setDifficulty('normal')">基礎 (圖文並茂)</button>
+                    <button class="option-btn diff-btn" id="diff-low" onclick="setDifficulty('low')">延遲提示 (先看後選)</button>
+                    <button class="option-btn diff-btn" id="diff-errorless" onclick="setDifficulty('errorless')">無錯誤學習 (隱藏錯誤)</button>
                 </div>
             </div>
 
             <div class="setting-row">
-                <span class="setting-label">分段顯示 (左->右): <span id="seq-val-display">0</span> 秒</span>
+                <span class="setting-label">🖼️ 顯示圖片 (多選，支援容錯):</span>
+                <div class="color-check-group">
+                    <label class="color-checkbox"><input type="checkbox" class="img-cb" value="apple.png" onchange="updateSettings()" checked> 🍎 蘋果</label>
+                    <label class="color-checkbox"><input type="checkbox" class="img-cb" value="orange.png" onchange="updateSettings()" checked> 🍊 橙子</label>
+                    <label class="color-checkbox"><input type="checkbox" class="img-cb" value="ball.png" onchange="updateSettings()" checked> ⚽ 球</label>
+                    <label class="color-checkbox"><input type="checkbox" class="img-cb" value="star.png" onchange="updateSettings()" checked> ⭐ 星星</label>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">📐 排列方式 (多選，訓練數感):</span>
+                <div class="color-check-group">
+                    <label class="color-checkbox"><input type="checkbox" class="layout-cb" value="pyramid" onchange="updateSettings()" checked> 1 vs 6 (金字塔)</label>
+                    <label class="color-checkbox"><input type="checkbox" class="layout-cb" value="grid" onchange="updateSettings()" checked> 1 vs 9 (九宮格)</label>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">⏳ 分段顯示 (左->右): <span id="seq-val-display" style="color:#FFF;">0</span> 秒</span>
                 <input type="range" id="seq-slider" min="0" max="5.0" step="0.5" value="0">
-                <p style="color:#aaa; font-size:12px; margin:5px 0 0 0;">
+                <p style="color:#AAA; font-size:14px; margin:8px 0 0 0;">
                     0秒為關閉。開啟後：左邊淡入->淡出->右邊淡入->淡出->同時出現。
                 </p>
             </div>
 
-            <div class="setting-row" style="border-bottom:none;">
-                <span class="setting-label">注視時間 (選取): <span id="gaze-val-display">0.8</span> 秒</span>
+            <div class="setting-row">
+                <span class="setting-label">⏱️ 眼動儀注視時間 (Dwell Time): <span id="gaze-val-display" style="color:#FFF;">0.8</span> 秒</span>
                 <input type="range" id="gaze-slider" min="0.3" max="2.0" step="0.1" value="0.8">
             </div>
 
@@ -347,7 +200,7 @@
     <div id="header">
         <span id="question-text">邊到多啲？</span>
         <div id="header-display" class="sample-display"></div>
-        <div id="settings-trigger" onclick="openSettings()">
+        <div id="settings-trigger" onclick="openSettings()" aria-label="打開設定">
             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .4.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.45-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
         </div>
     </div>
@@ -359,7 +212,7 @@
         <div id="status-hint">準備中...</div>
     </div>
 
-    <div id="next-btn" onclick="manualNext()">
+    <div id="next-btn" onclick="manualNext()" aria-label="下一題">
         <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
     </div>
 
@@ -368,21 +221,25 @@
         let EYE_DURATION_MS = 800; 
         const TOUCH_DURATION_MS = 100;
         let DIFFICULTY = 'normal'; 
-        let GAME_MODE = 'MORE'; // MORE (多) or LESS (少)
+        let GAME_MODE = 'MORE'; 
         let DELAY_SHOW_MS = 3000; 
-        let SEQ_SHOW_MS = 0; 
+        let SEQ_SHOW_MS = 0; // 已在此處宣告變數以解決 ReferenceError 錯誤
         
         const PROMPT_SHOW_MS = 4000;
         const AUTO_NEXT_MS = 5000;
 
-        const ALL_COLORS = [
-            {code: '#FF0000', name: '紅'},
-            {code: '#00FF00', name: '綠'},
-            {code: '#FFFF00', name: '黃'}
-        ];
-        let activeColors = ['#FF0000']; // 默認只用紅色
+        // 狀態變數 (存放使用者勾選的選項)
+        let activeImages = ['apple.png', 'orange.png', 'ball.png', 'star.png'];
+        let activeLayouts = ['pyramid', 'grid'];
 
-        let currentTargetColor = '#FF0000';
+        // Emoji 容錯對照表 (如果圖片遺失，將顯示對應 Emoji 確保遊戲不崩潰)
+        const fallbackEmojis = {
+            'apple.png': '🍎',
+            'orange.png': '🍊',
+            'ball.png': '⚽',
+            'star.png': '⭐'
+        };
+
         let timer = null;
         let autoNextTimer = null;
         let seqTimer1=null, seqTimer2=null, seqTimer3=null, seqTimer4=null;
@@ -394,7 +251,6 @@
         let statTotal = 0;
         let statCorrect = 0;
 
-        let currentUtterance = null;
         let audioCtx;
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -408,10 +264,8 @@
         };
 
         function initAppUI() {
-            initColorSettings();
             updateStatsUI();
 
-            // 綁定設定頁面事件
             const gazeSlider = document.getElementById('gaze-slider');
             const gazeDisplay = document.getElementById('gaze-val-display');
             gazeSlider.oninput = function() {
@@ -425,44 +279,26 @@
                 seqDisplay.innerText = this.value;
                 SEQ_SHOW_MS = this.value * 1000;
             }
+
+            updateSettings();
         }
 
-        function initColorSettings() {
-            const container = document.getElementById('color-settings');
-            if(!container) return;
-            container.innerHTML = '';
-            ALL_COLORS.forEach(color => {
-                const label = document.createElement('label');
-                label.className = 'color-checkbox';
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = color.code;
-                checkbox.checked = (color.code === '#FF0000'); 
-                checkbox.onchange = updateActiveColors;
-                
-                const preview = document.createElement('div');
-                preview.className = 'color-preview';
-                preview.style.backgroundColor = color.code;
-
-                label.appendChild(checkbox);
-                label.appendChild(document.createTextNode(color.name));
-                label.appendChild(preview);
-                container.appendChild(label);
-            });
-        }
-
-        function updateActiveColors() {
-            const checkboxes = document.querySelectorAll('#color-settings input[type="checkbox"]');
-            const selected = [];
-            checkboxes.forEach(cb => {
-                if (cb.checked) selected.push(cb.value);
-            });
-            if (selected.length === 0) {
-                alert("最少需要選擇一種顏色！");
-                checkboxes[0].checked = true;
-                selected.push(checkboxes[0].value);
+        function updateSettings() {
+            const imgCbs = document.querySelectorAll('.img-cb');
+            activeImages = Array.from(imgCbs).filter(cb => cb.checked).map(cb => cb.value);
+            if (activeImages.length === 0) {
+                alert("特教提醒：最少需要選擇一種圖片！");
+                imgCbs[0].checked = true;
+                activeImages.push(imgCbs[0].value);
             }
-            activeColors = selected;
+
+            const layoutCbs = document.querySelectorAll('.layout-cb');
+            activeLayouts = Array.from(layoutCbs).filter(cb => cb.checked).map(cb => cb.value);
+            if (activeLayouts.length === 0) {
+                alert("特教提醒：最少需要選擇一種排列方式！");
+                layoutCbs[0].checked = true;
+                activeLayouts.push(layoutCbs[0].value);
+            }
         }
 
         function openSettings() {
@@ -487,11 +323,6 @@
             DIFFICULTY = mode;
             document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('selected'));
             document.getElementById('diff-' + mode).classList.add('selected');
-            const desc = document.getElementById('diff-desc');
-            if(mode === 'high') desc.innerText = "較高：隱藏頂部圖示，只讀出問題，依賴聽覺記憶。";
-            if(mode === 'normal') desc.innerText = "基礎：顯示文字與圖示，3秒後出現選項。";
-            if(mode === 'low') desc.innerText = "較低：先在中央顯示正確答案並讀題，4秒後顯示選項。";
-            if(mode === 'errorless') desc.innerText = "無錯誤：只顯示正確答案，另一邊隱藏。";
         }
 
         function updateStatsUI() {
@@ -502,44 +333,35 @@
         }
 
         function resetStats() {
-            statTotal = 0;
-            statCorrect = 0;
-            updateStatsUI();
+            statTotal = 0; statCorrect = 0; updateStatsUI();
         }
 
         // --- 遊戲流程 ---
-
         function startGameFlow() {
             document.getElementById('start-overlay').style.display = 'none';
             if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
             initGame();
         }
 
-        function speakQuestion() {
+        function speakText(text) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let text = "邊到多啲？";
-                if (GAME_MODE === 'LESS') text = "邊到少啲？";
-                
-                currentUtterance = new SpeechSynthesisUtterance(text);
-                currentUtterance.lang = 'zh-HK';
-                currentUtterance.rate = 0.8;
-                currentUtterance.pitch = 1.1;
-                window.speechSynthesis.speak(currentUtterance);
+                window.speechSynthesis.cancel(); // 確保不會被之前的語音卡住
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'zh-HK'; u.rate = 0.85; u.pitch = 1.1;
+                window.speechSynthesis.speak(u);
             }
         }
 
-        function speakSuccess() {
-             if ('speechSynthesis' in window) {
-                let text = "係喎，呢到多啲。";
-                if (GAME_MODE === 'LESS') text = "係喎，呢到少啲。";
-                
-                currentUtterance = new SpeechSynthesisUtterance(text);
-                currentUtterance.lang = 'zh-HK';
-                currentUtterance.rate = 0.9;
-                currentUtterance.pitch = 1.2;
-                window.speechSynthesis.speak(currentUtterance);
-            }
+        function playTickSound() {
+            // 提供給眼動儀使用者的微小回饋音，確認視線已鎖定
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
         function playExtendedSuccessSound() {
@@ -547,45 +369,29 @@
             const now = audioCtx.currentTime;
             const root = 523.25; 
             const sequence = [
-                {t:0.0,f:root},{t:0.2,f:root*1.25},{t:0.4,f:root*1.5},{t:0.6,f:root*2},
-                {t:0.8,f:root*2.5},{t:1.0,f:root*3},{t:1.4,f:root*3},{t:1.6,f:root*2.5},
-                {t:1.8,f:root*2},{t:2.0,f:root*1.5},{t:2.4,f:root*2},{t:2.5,f:root*2.5},{t:2.6,f:root*2}
+                {t:0.0,f:root},{t:0.2,f:root*1.25},{t:0.4,f:root*1.5},{t:0.6,f:root*2}
             ];
             sequence.forEach(note => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'triangle'; osc.frequency.value = note.f;
                 gain.gain.setValueAtTime(0.01, now+note.t);
-                gain.gain.linearRampToValueAtTime(0.2, now+note.t+0.05);
+                gain.gain.linearRampToValueAtTime(0.1, now+note.t+0.05);
                 gain.gain.exponentialRampToValueAtTime(0.001, now+note.t+0.4);
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(now+note.t); osc.stop(now+note.t+0.5);
             });
-            setTimeout(() => {
-                [root, root*1.25, root*1.5, root*2].forEach(freq => {
-                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                    osc.type = 'sine'; osc.frequency.value = freq;
-                    const st = now + 3.0;
-                    gain.gain.setValueAtTime(0, st);
-                    gain.gain.linearRampToValueAtTime(0.1, st+0.5);
-                    gain.gain.linearRampToValueAtTime(0, st+2.5);
-                    osc.connect(gain); gain.connect(audioCtx.destination);
-                    osc.start(st); osc.stop(st+2.5);
-                });
-            }, 0);
         }
 
-        // --- 初始化遊戲核心邏輯 ---
         function initGame() {
             if (autoNextTimer) clearTimeout(autoNextTimer);
             if (seqTimer1) clearTimeout(seqTimer1);
             if (seqTimer2) clearTimeout(seqTimer2);
             if (seqTimer3) clearTimeout(seqTimer3);
             if (seqTimer4) clearTimeout(seqTimer4);
-            
+
             window.speechSynthesis.cancel();
-            isSolved = false;
-            isInputReady = false; 
+            isSolved = false; isInputReady = false; 
             
             const hint = document.getElementById('status-hint');
             hint.innerText = "準備中...";
@@ -599,25 +405,24 @@
             const headerDisplay = document.getElementById('header-display');
             headerDisplay.innerHTML = ''; 
 
+            // 初始化容器狀態
             [leftOpt, rightOpt].forEach(el => {
-                el.style.transition = 'none';
-                el.style.opacity = '0'; 
-                el.className = 'option-container';
-                el.classList.remove('fullscreen-win');
-                el.style.display = 'flex';
-                el.style.pointerEvents = 'auto'; 
-                el.style.visibility = 'visible'; 
-                void el.offsetWidth; 
+                el.style.transition = 'none'; el.style.opacity = '0'; el.style.filter = 'none';
+                el.className = 'option-container'; el.style.display = 'flex'; el.style.pointerEvents = 'auto'; 
+                el.style.visibility = 'visible'; void el.offsetWidth; 
             });
 
-            currentTargetColor = activeColors[Math.floor(Math.random() * activeColors.length)];
+            // 1. 隨機決定圖片與排列方式
+            const currentImgUrl = activeImages[Math.floor(Math.random() * activeImages.length)];
+            const currentLayout = activeLayouts[Math.floor(Math.random() * activeLayouts.length)];
 
-            // 定義目標數量：多=6，少=1
-            const targetCount = (GAME_MODE === 'MORE') ? 6 : 1;
-            const distractorCount = (GAME_MODE === 'MORE') ? 1 : 6;
+            // 2. 決定數量
+            const largeAmount = (currentLayout === 'grid') ? 9 : 6;
+            const targetCount = (GAME_MODE === 'MORE') ? largeAmount : 1;
+            const distractorCount = (GAME_MODE === 'MORE') ? 1 : largeAmount;
 
-            const targetSVG = createAppleGroup(targetCount, currentTargetColor);
-            
+            // 頂部提示 SVG
+            const targetSVG = createItemGroup(targetCount, currentImgUrl, currentLayout);
             if (DIFFICULTY !== 'high') {
                 headerDisplay.appendChild(targetSVG.cloneNode(true));
                 headerDisplay.style.opacity = '1';
@@ -625,35 +430,33 @@
                 headerDisplay.style.opacity = '0';
             }
 
-            speakQuestion();
+            speakText((GAME_MODE === 'MORE') ? "邊到多啲？" : "邊到少啲？");
 
+            // 生成選項 SVG
             const correctSide = Math.random() < 0.5 ? 0 : 1;
             leftOpt.innerHTML = '<div class="progress-ring"></div>';
             rightOpt.innerHTML = '<div class="progress-ring"></div>';
 
-            const correctSVG = createAppleGroup(targetCount, currentTargetColor);
-            const distractorSVG = createAppleGroup(distractorCount, currentTargetColor);
+            const correctSVG = createItemGroup(targetCount, currentImgUrl, currentLayout);
+            const distractorSVG = createItemGroup(distractorCount, currentImgUrl, currentLayout);
 
             if (correctSide === 0) {
-                leftOpt.appendChild(correctSVG); leftOpt.dataset.correct = "true";
-                rightOpt.appendChild(distractorSVG); rightOpt.dataset.correct = "false";
-                delete leftOpt.dataset.hide; 
-                if (DIFFICULTY === 'errorless') rightOpt.dataset.hide = "true";
-                else delete rightOpt.dataset.hide;
+                leftOpt.appendChild(correctSVG); leftOpt.dataset.correct = "true"; delete leftOpt.dataset.hide;
+                rightOpt.appendChild(distractorSVG); rightOpt.dataset.correct = "false"; delete rightOpt.dataset.hide;
+                if (DIFFICULTY === 'errorless') { rightOpt.dataset.hide = "true"; rightOpt.style.pointerEvents = "none"; }
             } else {
-                rightOpt.appendChild(correctSVG); rightOpt.dataset.correct = "true";
-                leftOpt.appendChild(distractorSVG); leftOpt.dataset.correct = "false";
-                delete rightOpt.dataset.hide;
-                if (DIFFICULTY === 'errorless') leftOpt.dataset.hide = "true";
-                else delete leftOpt.dataset.hide;
+                rightOpt.appendChild(correctSVG); rightOpt.dataset.correct = "true"; delete rightOpt.dataset.hide;
+                leftOpt.appendChild(distractorSVG); leftOpt.dataset.correct = "false"; delete leftOpt.dataset.hide;
+                if (DIFFICULTY === 'errorless') { leftOpt.dataset.hide = "true"; leftOpt.style.pointerEvents = "none"; }
             }
 
+            // 延遲顯示邏輯
             if (DIFFICULTY === 'low' || DIFFICULTY === 'errorless') {
                 const centerPrompt = document.getElementById('center-prompt');
                 centerPrompt.innerHTML = '';
-                centerPrompt.appendChild(createAppleGroup(targetCount, currentTargetColor));
+                centerPrompt.appendChild(createItemGroup(targetCount, currentImgUrl, currentLayout));
                 centerPrompt.style.display = 'block';
-                hint.innerText = "看看這裡...";
+                hint.innerText = "👀 看看這裡...";
                 
                 setTimeout(() => {
                     if(isSolved) return; 
@@ -661,9 +464,8 @@
                     if (SEQ_SHOW_MS > 0) runSequentialDisplay();
                     else showBothOptions(); 
                 }, PROMPT_SHOW_MS);
-
             } else {
-                hint.innerText = "聽聽看題目...";
+                hint.innerText = "👂 聽聽看題目...";
                 setTimeout(() => {
                     if(isSolved) return;
                     if (SEQ_SHOW_MS > 0) runSequentialDisplay();
@@ -671,8 +473,7 @@
                 }, DELAY_SHOW_MS);
             }
 
-            bindEvents(leftOpt);
-            bindEvents(rightOpt);
+            bindEvents(leftOpt); bindEvents(rightOpt);
         }
 
         function runSequentialDisplay() {
@@ -685,7 +486,7 @@
             left.style.transition = 'opacity 0.5s ease';
             right.style.transition = 'opacity 0.5s ease';
 
-            hint.innerText = "看左邊...";
+            hint.innerText = "👀 看左邊...";
             if (!left.dataset.hide) left.style.opacity = '1';
             right.style.opacity = '0';
 
@@ -695,7 +496,7 @@
 
                 seqTimer2 = setTimeout(() => {
                     if(isSolved) return;
-                    hint.innerText = "看右邊...";
+                    hint.innerText = "👀 看右邊...";
                     if (!right.dataset.hide) right.style.opacity = '1';
 
                     seqTimer3 = setTimeout(() => {
@@ -717,149 +518,134 @@
             const rightOpt = document.getElementById('right-option');
             const hint = document.getElementById('status-hint');
 
-            leftOpt.style.transition = 'opacity 0.5s ease-in';
-            rightOpt.style.transition = 'opacity 0.5s ease-in';
+            leftOpt.style.transition = 'opacity 0.6s ease-in';
+            rightOpt.style.transition = 'opacity 0.6s ease-in';
 
             if (DIFFICULTY === 'errorless') {
-                if(!leftOpt.dataset.hide) leftOpt.style.opacity = '1';
-                else leftOpt.style.visibility = 'hidden';
-
-                if(!rightOpt.dataset.hide) rightOpt.style.opacity = '1';
-                else rightOpt.style.visibility = 'hidden';
+                if(!leftOpt.dataset.hide) leftOpt.style.opacity = '1'; else leftOpt.style.visibility = 'hidden';
+                if(!rightOpt.dataset.hide) rightOpt.style.opacity = '1'; else rightOpt.style.visibility = 'hidden';
             } else {
-                leftOpt.style.opacity = '1';
-                rightOpt.style.opacity = '1';
+                leftOpt.style.opacity = '1'; rightOpt.style.opacity = '1';
             }
             
             isInputReady = true; 
-            hint.innerText = (GAME_MODE === 'MORE') ? "請選擇多的一邊" : "請選擇少的一邊";
+            hint.innerText = (GAME_MODE === 'MORE') ? "👇 請選擇多的一邊" : "👇 請選擇少的一邊";
         }
 
-        // --- 核心修改：使用真實圖片 (apple.png) ---
-        function createAppleGroup(count, color) {
+        // --- 技術核心：具備容錯機制的圖像生成器 ---
+        function createItemGroup(count, imgUrl, layoutType) {
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("viewBox", "0 0 100 100");
             svg.setAttribute("class", "shape-svg");
 
-            // 指定圖片檔名 (已修改為 apple.png)
-            const appleImgUrl = "apple.png";
+            // 容錯機制：獲取對應的 Emoji
+            const fallbackEmoji = fallbackEmojis[imgUrl] || '❓';
 
-            // 輔助函式：新增圖片
-            function addApple(x, y, size) {
+            function addItem(x, y, size) {
+                // 1. 先放置 Emoji 作為底層保險 (Fallback)
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x);
+                text.setAttribute("y", y);
+                text.setAttribute("font-size", size * 0.8);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("dominant-baseline", "central");
+                text.textContent = fallbackEmoji;
+                svg.appendChild(text);
+
+                // 2. 放置真實圖片 (如果載入成功，會遮住底層的 Emoji)
                 const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
-                // 為了相容性使用 xlink:href (部分舊瀏覽器需要) 及 href
-                img.setAttributeNS("http://www.w3.org/1999/xlink", "href", appleImgUrl);
-                img.setAttribute("href", appleImgUrl);
-                
+                img.setAttributeNS("http://www.w3.org/1999/xlink", "href", imgUrl);
+                img.setAttribute("href", imgUrl);
                 img.setAttribute("x", x - size/2);
                 img.setAttribute("y", y - size/2);
                 img.setAttribute("width", size);
                 img.setAttribute("height", size);
-                
                 svg.appendChild(img);
             }
 
             if (count === 1) {
-                // 1個大蘋果，居中
-                addApple(50, 50, 60); 
-            } else {
-                // 6個蘋果 (1-2-3 疊疊樂)
-                const size = 22; // 調整大小以適應堆疊
-                
-                // 第一層 (頂) - 1顆
-                addApple(50, 25, size);
-                
-                // 第二層 (中) - 2顆
-                addApple(38, 50, size);
-                addApple(62, 50, size);
-                
-                // 第三層 (底) - 3顆
-                addApple(26, 75, size);
-                addApple(50, 75, size);
-                addApple(74, 75, size);
+                addItem(50, 50, 65); // 置中放大
+            } else if (layoutType === 'pyramid' && count === 6) {
+                const size = 22; 
+                addItem(50, 25, size);
+                addItem(38, 50, size); addItem(62, 50, size);
+                addItem(26, 75, size); addItem(50, 75, size); addItem(74, 75, size);
+            } else if (layoutType === 'grid' && count === 9) {
+                const size = 20; 
+                const positions = [25, 50, 75]; // 完美等距分佈
+                for (let row of positions) {
+                    for (let col of positions) {
+                        addItem(col, row, size);
+                    }
+                }
             }
             return svg;
         }
 
         // --- 互動與判定 ---
         function bindEvents(elem) {
-            // Touch
             elem.ontouchstart = (e) => handleStart(e, elem);
             elem.ontouchend = () => handleEnd(elem);
-            // Mouse
             elem.onmousedown = (e) => handleStart(e, elem);
             elem.onmouseup = () => handleEnd(elem);
             elem.onmouseleave = () => handleEnd(elem);
         }
 
         function handleStart(e, elem) {
-            if (isSolved || !isInputReady) return;
-            if (elem.dataset.hide) return; 
-
-            // 如果是滑鼠右鍵忽略
+            if (isSolved || !isInputReady || elem.dataset.hide) return; 
             if (e.type === 'mousedown' && e.button !== 0) return;
             
-            // 視覺反饋
+            playTickSound(); // 聲音反饋
             elem.style.transform = 'scale(0.95)';
             const ring = elem.querySelector('.progress-ring');
             if(ring) {
                 ring.classList.add('active-ring');
-                // 設定動畫時間
                 ring.style.animationDuration = (EYE_DURATION_MS/1000) + 's';
             }
 
-            timer = setTimeout(() => {
-                triggerSelect(elem);
-            }, EYE_DURATION_MS);
+            timer = setTimeout(() => { triggerSelect(elem); }, EYE_DURATION_MS);
         }
 
         function handleEnd(elem) {
-            if (timer) {
-                clearTimeout(timer);
-                timer = null;
-            }
-            elem.style.transform = 'scale(1)';
+            if (timer) { clearTimeout(timer); timer = null; }
+            if (!isSolved) elem.style.transform = 'scale(1)';
             const ring = elem.querySelector('.progress-ring');
-            if(ring) {
-                ring.classList.remove('active-ring');
-                void ring.offsetWidth; // reset animation
-            }
+            if(ring) { ring.classList.remove('active-ring'); void ring.offsetWidth; }
         }
 
-        // 觸發選擇（判定對錯）
         function triggerSelect(elem) {
             if (isSolved) return;
-            
             const isCorrect = (elem.dataset.correct === "true");
             
             if (isCorrect) {
-                isSolved = true;
-                statTotal++;
-                statCorrect++;
-                updateStatsUI();
+                isSolved = true; statTotal++; statCorrect++; updateStatsUI();
 
-                // 勝利視覺效果
+                // 勝利視覺與聽覺
                 elem.classList.add('fullscreen-win');
-                document.getElementById('status-hint').innerText = "答啱咗！好棒！";
-                
+                document.getElementById('status-hint').innerText = "🌟 答啱咗！好棒！";
                 playExtendedSuccessSound();
-                speakSuccess();
+                speakText((GAME_MODE === 'MORE') ? "係喎，呢到多啲。" : "係喎，呢到少啲。");
                 
                 document.getElementById('next-btn').style.display = 'flex';
-                
-                // 自動下一題倒數
                 autoNextTimer = setTimeout(manualNext, AUTO_NEXT_MS);
                 
             } else {
-                statTotal++;
-                updateStatsUI();
+                statTotal++; updateStatsUI();
                 
-                // 錯誤反饋 (紅色閃爍)
-                elem.style.transition = "background-color 0.2s";
-                elem.style.backgroundColor = "#550000";
+                // 特教優化：感官友善的錯誤反饋 (避免刺眼深紅閃爍，改為淡化與微幅震動)
+                elem.style.transition = "transform 0.1s, filter 0.3s, opacity 0.3s";
+                elem.style.opacity = "0.5";
+                elem.style.filter = "grayscale(80%)";
+                
+                // 輕微搖晃
+                elem.style.transform = "translateX(5px)";
+                setTimeout(() => elem.style.transform = "translateX(-5px)", 100);
+                setTimeout(() => elem.style.transform = "translateX(5px)", 200);
                 setTimeout(() => {
-                    elem.style.backgroundColor = (elem.id === 'left-option' ? '#111' : '#1a1a1a');
-                }, 300);
+                    elem.style.transform = "scale(1)";
+                    elem.style.opacity = "1";
+                    elem.style.filter = "none";
+                }, 400);
                 
                 document.getElementById('status-hint').innerText = "再試一次...";
             }
